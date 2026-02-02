@@ -1,28 +1,46 @@
 package com.alura.BoockSearch;
 
+import com.alura.BoockSearch.model.DatosLibro;
 import com.alura.BoockSearch.model.DatosRespuesta;
+import com.alura.BoockSearch.repository.AutorRepository;
 import com.alura.BoockSearch.service.ConversorDatos;
+import com.alura.BoockSearch.service.LibroService;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import com.alura.BoockSearch.service.ConsumoAPI;
 
 @SpringBootApplication
-public class BoockSearchApplication {
+public class BoockSearchApplication implements CommandLineRunner {
+
+    private final ConsumoAPI consumoAPI;
+    private final ConversorDatos conversorDatos;
+    private final LibroService libroService;
+
+    public BoockSearchApplication(
+            ConsumoAPI consumoAPI,
+            ConversorDatos conversorDatos,
+            LibroService libroService) {
+     this.consumoAPI = consumoAPI;
+     this.conversorDatos = conversorDatos;
+     this.libroService = libroService;
+    }
 
 	public static void main(String[] args) {
-		SpringApplication.run(BoockSearchApplication.class, args);
+        SpringApplication.run(BoockSearchApplication.class, args);
+    }
 
-        ConsumoAPI consumo = new ConsumoAPI();  // -> SOLO TRAE EL JSON, NÓ LO INTERPROTA
-        ConversorDatos conversor = new ConversorDatos();
+    @Override
+    public void run(String... args) {
 
+        String URL = "https://gutendex.com/books/?search=java";
+        String json = consumoAPI.obtenerDatos(URL);
+        DatosRespuesta respuesta =
+                conversorDatos.obtenerDatos(json, DatosRespuesta.class);
+        for (DatosLibro datosLibro : respuesta.results()) {
+            libroService.guardarLibro(datosLibro);
+        }
 
-        String json = consumo.obtenerDatos(
-                "https://gutendex.com/books/?search=dickens%20great"
-        );
-
-        DatosRespuesta datos =  conversor.obtenerDatos(json, DatosRespuesta.class);
-
-        datos.results().forEach(libro -> System.out.println(libro.title())
-        );
+         System.out.println("📚 Libros guardados correctamente en la base de datos 💙");
     }
 }

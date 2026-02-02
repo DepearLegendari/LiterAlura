@@ -1,19 +1,22 @@
 package com.alura.BoockSearch.service;
 
-import java.io.IOException;
+import org.springframework.stereotype.Service;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+@Service
 public class ConsumoAPI {
+
     public String obtenerDatos(String URL){
+        try {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL))
                 .build();
 
-        try {
             HttpResponse<String> response=
                     client.send(request, HttpResponse.BodyHandlers.ofString());
             return response.body();
