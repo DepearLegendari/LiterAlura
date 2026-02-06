@@ -9,17 +9,27 @@ public class Libro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String titulo;
     private String idioma;
-    private Integer numeroDescarga;
+    private Integer numeroDescargas;
 
 // 🔗 RELACION AUTOR -> LIBRO
     @ManyToOne
     @JoinColumn(name = "autor_id")
     private Autor autor;
 
-// ° CONSTRUCTOR VACIO PARA GENERAR OBJETOS INTERNAMENTE
-    public Libro() {}
+// ° CONSTRUCTOR VACIO PARA GENERAR OBJETOS INTERNAMENTE JPA
+    protected Libro(){
+}
+
+//  Constructor personalizado
+    public Libro(DatosLibro datos, Autor autor, String idioma) {
+        this.titulo = datos.title();
+        this.numeroDescargas = datos.download_count();
+        this.idioma = idioma;
+        this.autor = autor;
+    }
 
 // Getters y Setters
     public Long getId() {
@@ -29,7 +39,6 @@ public class Libro {
     public String getTitulo() {
         return titulo;
     }
-
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
@@ -42,12 +51,12 @@ public class Libro {
         this.idioma = idioma;
     }
 
-    public Integer getNumeroDescarga() {
-        return numeroDescarga;
+    public Integer getNumeroDescargas() {
+        return numeroDescargas;
     }
 
-    public void setNumeroDescarga(Integer numeroDescarga) {
-        this.numeroDescarga = numeroDescarga;
+    public void setNumeroDescargas(Integer numeroDescargas) {
+        this.numeroDescargas = numeroDescargas;
     }
 
     public Autor getAutor() {
@@ -56,5 +65,17 @@ public class Libro {
 
     public void setAutor(Autor autor) {
         this.autor = autor;
+    }
+
+    @Override
+    public String toString() {
+        String nombreAutor = (autor != null) ? autor.getNombre() : "Desconocido";
+
+                return """
+                📘 Título: %s
+                🌍 Idioma: %s
+                ⬇ Descargas: %d
+                ✍ Autor: %s
+                """.formatted(titulo, idioma, numeroDescargas, nombreAutor);
     }
 }

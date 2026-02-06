@@ -10,10 +10,10 @@ public record DatosLibro(
         Integer id,
         String title,
         List<DatosAutor> authors,
-        @JsonProperty("language")
-        List<String> lenguages,
+        @JsonProperty("idiomas")
+        List<String> idioma,
         Integer download_count
-
-
 ) {
+
+
 }

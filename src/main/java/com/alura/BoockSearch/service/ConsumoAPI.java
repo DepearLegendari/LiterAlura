@@ -13,15 +13,19 @@ public class ConsumoAPI {
     public String obtenerDatos(String URL){
         try {
         HttpClient client = HttpClient.newHttpClient();
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL))
+                .GET()
                 .build();
 
             HttpResponse<String> response=
                     client.send(request, HttpResponse.BodyHandlers.ofString());
+
             return response.body();
+
         } catch (Exception e) {
-            throw new RuntimeException("Error el consumir la API", e);
+            throw new RuntimeException("Error al consultar la API", e);
         }
     }
 }

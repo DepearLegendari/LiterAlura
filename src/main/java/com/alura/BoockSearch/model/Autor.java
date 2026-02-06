@@ -10,12 +10,19 @@ public class Autor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nombre;
-    private Integer anioNacimiento;
-    private Integer anioFallecimiento;
+    private Integer nacimiento;
+    private Integer fallecimiento;
 
 // ° CONSTRUCTOR VACIO PARA GENERAR OBJETOS INTERNAMENTE
-    public Autor() {}
+    protected Autor() {}
+
+    public Autor(DatosAutor datos) {
+        this.nombre = datos.name();
+        this.nacimiento = datos.birth_year();
+        this.fallecimiento = datos.death_year();
+    }
 
 // Getters y Setters
     public Long getId() {
@@ -26,23 +33,26 @@ public class Autor {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public Integer getNacimiento() {
+        return nacimiento;
     }
 
-    public Integer getAnioNacimiento() {
-        return anioNacimiento;
+    public Integer getFallecimiento() {
+        return fallecimiento;
     }
 
-    public void setAnioNacimiento(Integer anioNacimiento) {
-        this.anioNacimiento = anioNacimiento;
-    }
 
-    public Integer getAnioFallecimiento() {
-        return anioFallecimiento;
-    }
-
-    public void setAnioFallecimiento(Integer anioFallecimiento) {
-        this.anioFallecimiento = anioFallecimiento;
+@Override
+    public String toString() {
+        return """
+                👤 Autor: %s
+                🎂 Nacimiento: %d
+                ⚰ Fallecimiento: %s
+                """.formatted(
+                        nombre,
+                nacimiento,
+                fallecimiento != null ? fallecimiento : "vivo"
+        );
     }
 }
+

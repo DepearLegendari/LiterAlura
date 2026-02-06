@@ -1,51 +1,84 @@
 package com.alura.BoockSearch.service;
 
-import com.alura.BoockSearch.model.Autor;
-import com.alura.BoockSearch.model.DatosAutor;
-import com.alura.BoockSearch.model.DatosLibro;
-import com.alura.BoockSearch.model.Libro;
+import com.alura.BoockSearch.model.*;
 import com.alura.BoockSearch.repository.AutorRepository;
 import com.alura.BoockSearch.repository.LibroRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class LibroService {
 
+    private static final String URL_BASE = "https://gutendex.com/books/?search=";
+
     private final LibroRepository libroRepository;
     private final AutorRepository autorRepository;
+    private ConsumoAPI consumoAPI = new ConsumoAPI();
+    private ConversorDatos conversor = new ConversorDatos();
 
     public LibroService(LibroRepository libroRepository,
-                        AutorRepository autorRepository) {
+                        AutorRepository autorRepository,
+                        ConsumoAPI consumoAPI,
+                        ConversorDatos conversor) {
         this.libroRepository = libroRepository;
         this.autorRepository = autorRepository;
+        this.consumoAPI = consumoAPI;
+        this.conversor = conversor;
     }
-    public void guardarLibro(DatosLibro datosLibro) {
-        Autor autor = datosLibro.authors().stream()
-                .findFirst()
-                .map(this::obtenerAutor)
-                .orElse(null);
 
-        String idioma = "N/A";
-        if (datosLibro.lenguages() != null && !datosLibro.lenguages().isEmpty()) {
-            idioma = datosLibro.lenguages().get(0);
+    // 🔎 CASE 1 - Buscar libro por título
+    public void buscarYGuardarLibro(String titulo) {
+
+        String json = consumoAPI.obtenerDatos(
+                URL_BASE + titulo.replace(" ", "%20")
+        );
+
+        DatosRespuesta respuesta = conversor.obtenerDatos(json, DatosRespuesta.class);
+
+        if (respuesta.results().isEmpty()) {
+            System.out.println("Libro no encontrado");
+            return;
         }
-        Libro libro = new Libro();
-        libro.setTitulo(datosLibro.title());
-        libro.setIdioma(idioma);
-        libro.setNumeroDescarga(datosLibro.download_count());
-        libro.setAutor(autor);
 
+        DatosLibro datosLibro = respuesta.results().get(0);
+        DatosAutor datosAutor = datosLibro.authors().get(0);
+
+        Autor autor = autorRepository
+                .findByNombreIgnoreCase(datosAutor.name())
+                .orElseGet(() ->
+                        autorRepository.save(new Autor(datosAutor))
+                );
+
+        String idioma = "Desconocido";
+        if (!datosLibro.idioma().isEmpty()) {
+            idioma = datosLibro.idioma().get(0);
+        }
+
+        Libro libro = new Libro(datosLibro, autor, idioma);
         libroRepository.save(libro);
+
+        System.out.println("✅ Libro guardado correctamente");
     }
 
-    private Autor obtenerAutor(DatosAutor datosAutor) {
-        return autorRepository.findByNombreIgnoreCase(datosAutor.name())
-                .orElseGet(() -> {
-                    Autor autor = new Autor();
-                    autor.setNombre(datosAutor.name());
-                    autor.setAnioNacimiento(datosAutor.birth_year());
-                    autor.setAnioFallecimiento(datosAutor.death_year());
-                    return autorRepository.save(autor);
-                });
+    // 📚 CASE 2 - Listar libros
+    public List<Libro> listarLibros() {
+        return libroRepository.findAll();
+    }
+
+    // 👤 CASE 3 - Listar autores
+    public List<Autor> listarAutores() {
+        return autorRepository.findAll();
+    }
+
+    // 📅 CASE 4 - Autores vivos en un año
+    public List<Autor> autoresVivosEnAnio(int anio)  {
+        return autorRepository.autoresVivosEnAnio(anio);
+    }
+
+    // 🌍 CASE 5 - Libros por idioma
+    public List<Libro> buscarPorIdioma(String idioma) {
+            return libroRepository.findByIdioma(idioma);
+
     }
 }
