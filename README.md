@@ -46,12 +46,17 @@ URL base: https://gutendex.com/books/
 ## 🗂️ Estructura del proyecto
 
 src/main/java/com/alura/BoockSearch
-│
-├── model → Entidades y Records
-├── repository → Repositorios JPA
-├── service → Lógica de negocio
-├── api → Consumo de API
-└── BoockSearchApplication.java
+
+
+├── model → Entidades y Records.
+
+├── repository → Repositorios JPA.
+
+├── service → Lógica de negocio.
+
+├── api → Consumo de API.
+
+└── BoockSearchApplication.java.
 
 ----------
 
